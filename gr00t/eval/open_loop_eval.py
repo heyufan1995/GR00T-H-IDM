@@ -145,6 +145,7 @@ def evaluate_single_trajectory(
     steps=300,
     action_horizon=16,
     save_plot_path=None,
+    save_plots: bool = True,
 ):
     # Ensure steps doesn't exceed trajectory length
     traj = loader[traj_id]
@@ -215,17 +216,18 @@ def evaluate_single_trajectory(
     logging.info(f"gt_action_joints vs time {gt_action_across_time.shape}")
     logging.info(f"pred_action_joints vs time {pred_action_across_time.shape}")
 
-    # Plot trajectory results
-    plot_trajectory_results(
-        state_joints_across_time=state_joints_across_time,
-        gt_action_across_time=gt_action_across_time,
-        pred_action_across_time=pred_action_across_time,
-        traj_id=traj_id,
-        state_keys=state_keys,
-        action_keys=action_keys,
-        action_horizon=action_horizon,
-        save_plot_path=save_plot_path or f"/tmp/open_loop_eval/traj_{traj_id}.jpeg",
-    )
+    if save_plots:
+        plot_path = save_plot_path or f"/tmp/open_loop_eval/traj_{traj_id}.jpeg"
+        plot_trajectory_results(
+            state_joints_across_time=state_joints_across_time,
+            gt_action_across_time=gt_action_across_time,
+            pred_action_across_time=pred_action_across_time,
+            traj_id=traj_id,
+            state_keys=state_keys,
+            action_keys=action_keys,
+            action_horizon=action_horizon,
+            save_plot_path=plot_path,
+        )
 
     return mse, mae
 

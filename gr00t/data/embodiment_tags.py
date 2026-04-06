@@ -198,6 +198,14 @@ class EmbodimentTag(Enum):
     Actions use REL_XYZ_ROT6D pose targets plus a gripper channel (1D).
     """
 
+    MEDBOT = "medbot"
+    """
+    MedbotWorld-style bimanual surgical robot in LeRobot format (tutorial / downstream).
+    Dual-arm Cartesian (3) + rotation (6) + jaw (1) per arm, single left-endoscope video,
+    and task text from ``tasks.jsonl``. Actions use absolute targets with temporal mean/std
+    normalization (no REL_XYZ_ROT6D conversion — dataset stores split pose channels).
+    """
+
     # New embodiment during post-training
     NEW_EMBODIMENT = "new_embodiment"
     """

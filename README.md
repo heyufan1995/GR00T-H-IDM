@@ -100,6 +100,7 @@ The [Open-H dataset](https://huggingface.co/datasets/nvidia/PhysicalAI-Robotics-
 | [Inference Guide](scripts/deployment/README.md) | Inference options, TensorRT, server-client architecture |
 | [Policy API](getting_started/policy.md) | Observation/action formats, batched inference, environment integration |
 | [Finetuning Guide](getting_started/finetune_new_embodiment.md) | Custom embodiment finetuning tutorial |
+| [GR00T-H-IDM (downstream LeRobot + IDM-style eval)](docs/GR00T-H-IDM.md) | Medbot LeRobot finetune, stats, `idm_lerobot_eval` benchmark |
 | [Hardware Recommendations](getting_started/hardware_recommendation.md) | RTX PRO Servers, DGX, Jetson AGX Thor |
 | [Docker Setup](docker/README.md) | Containerized environment setup |
 

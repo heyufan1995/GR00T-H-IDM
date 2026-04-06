@@ -275,8 +275,8 @@ model:
   reproject_vision: false
   backbone_trainable_params_fp32: true
 
-  # Action horizon — padded to 50 for mixed embodiments
-  action_horizon: 50
+  # Action horizon — 16-step chunks; video uses frames i and i+16 (see open_h/embodiments/temporal_layout.py)
+  action_horizon: 16
 
 training:
   # Base model

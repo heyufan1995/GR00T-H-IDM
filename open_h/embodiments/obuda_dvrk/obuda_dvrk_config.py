@@ -14,7 +14,6 @@ Design decisions:
 - Cameras use endoscope.left + both wrist views (3 views).
 - Actions use REL_XYZ_ROT6D for EEF poses and ABSOLUTE for grippers.
 - Language uses tasks.jsonl via the "task" key.
-- ACTION_HORIZON = 50 (all episodes are >= 50 frames).
 """
 
 from gr00t.configs.data.embodiment_configs import register_modality_config
@@ -27,14 +26,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future steps to predict).
-# We keep the 50-step horizon to match other Open-H surgical configs.
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 obuda_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "endoscope_left",
             "wrist_left",
@@ -59,8 +58,7 @@ obuda_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Use consecutive indices [0..49] so horizon covers ~1.67s at 30 FPS.
-        delta_indices=list(range(ACTION_HORIZON)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm1_pose",
             "psm1_gripper",

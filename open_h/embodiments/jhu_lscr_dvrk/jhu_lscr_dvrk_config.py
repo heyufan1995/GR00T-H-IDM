@@ -21,15 +21,15 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizons tuned to dataset FPS.
-ACTION_HORIZON_15HZ = 25
-ACTION_HORIZON_10HZ = 16
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 
 jhu_lscr_miracle_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "camera_left",
             # "camera_right", # Mono Only
@@ -51,9 +51,7 @@ jhu_lscr_miracle_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Cartesian pose actions are derived from the same EEF pose state, so
-        # the action horizon starts at t+1 relative to the reference pose at t.
-        delta_indices=list(range(1, ACTION_HORIZON_15HZ + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm1_pose",
             "psm1_gripper",
@@ -106,7 +104,7 @@ jhu_lscr_miracle_config = {
 
 jhu_lscr_smarts_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "endoscope_left",
             # "endoscope_right", # Mono Only
@@ -129,7 +127,7 @@ jhu_lscr_smarts_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(1, ACTION_HORIZON_10HZ + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm1_pose",
             "psm1_gripper",

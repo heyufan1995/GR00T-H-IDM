@@ -25,14 +25,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# 30 Hz -> 50 frames ~= 1.7 seconds
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 tud_tundra_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "laparoscope_left",
             # "laparoscope_right", # Mono Only
@@ -52,7 +52,7 @@ tud_tundra_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(1, ACTION_HORIZON + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "eef_pose",
             "gripper",

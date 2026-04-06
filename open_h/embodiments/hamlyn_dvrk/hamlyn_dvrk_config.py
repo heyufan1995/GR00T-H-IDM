@@ -29,21 +29,21 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
+
 
 # =============================================================================
 # 15Hz Configuration (7 tasks)
 # =============================================================================
 # Tasks: knot_tying, needle_grasp_and_handover, peg_transfer, Suturing-1,
 #        Suturing-2, suturing_single_loop_2, tissue_lifting
-#
-# Action horizon: 25 steps = 1.67 seconds at 15Hz
-# This keeps ~85% of samples usable for episodes with 100+ frames.
-
-ACTION_HORIZON_15HZ = 25
 
 hamlyn_15hz_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=["endoscope", "wrist_left", "wrist_right"],
     ),
     "state": ModalityConfig(
@@ -62,7 +62,7 @@ hamlyn_15hz_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(ACTION_HORIZON_15HZ)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "left_arm_pose",
             "left_arm_gripper",
@@ -121,15 +121,10 @@ hamlyn_15hz_config = {
 # 30Hz Configuration (2 tasks)
 # =============================================================================
 # Tasks: suturing_single_loop_1, tissue_retraction
-#
-# Action horizon: 50 steps = 1.67 seconds at 30Hz (same time window as 15Hz config)
-# This keeps ~85% of samples usable for episodes with 100+ frames.
-
-ACTION_HORIZON_30HZ = 50
 
 hamlyn_30hz_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=["endoscope", "wrist_left", "wrist_right"],
     ),
     "state": ModalityConfig(
@@ -148,7 +143,7 @@ hamlyn_30hz_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(ACTION_HORIZON_30HZ)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "left_arm_pose",
             "left_arm_gripper",

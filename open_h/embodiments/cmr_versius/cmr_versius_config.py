@@ -56,15 +56,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-ACTION_HORIZON = 50
-# Frame stride for downsampling 60Hz -> 30Hz
-FRAME_STRIDE = 2
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 cmr_versius_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "endoscope",
         ],
@@ -101,8 +100,7 @@ cmr_versius_config = {
         ],
     ),
     "action": ModalityConfig(
-        # [2, 4, 6, ..., 100] - stride=2 for 30Hz effective rate, starts at 2 to skip current state
-        delta_indices=list(range(FRAME_STRIDE, ACTION_HORIZON * FRAME_STRIDE + 1, FRAME_STRIDE)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "left_pose",
             "left_gripper",

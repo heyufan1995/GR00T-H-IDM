@@ -26,13 +26,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 turin_mitic_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "endoscope_left",
             # "endoscope_right", # Mono Only
@@ -58,7 +59,7 @@ turin_mitic_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(1, ACTION_HORIZON + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm1_pose",
             "psm2_pose",

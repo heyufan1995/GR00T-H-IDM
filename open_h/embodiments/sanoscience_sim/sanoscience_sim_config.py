@@ -68,15 +68,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# With horizon=36: 99.7% of episodes usable (13,968/14,004), 1,085,094 training steps
-# Only 36 episodes dropped (those with < 36 frames)
-ACTION_HORIZON = 36
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 sanoscience_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "camera_color",
         ],
@@ -110,8 +109,7 @@ sanoscience_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Start at +1 so index 0 is state reference (CMR-style offset)
-        delta_indices=list(range(1, ACTION_HORIZON + 1)),  # [1, 2, 3, ..., 36]
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             # Instrument 0
             "inst_0_pose",

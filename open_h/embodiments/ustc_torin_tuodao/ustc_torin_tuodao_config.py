@@ -39,14 +39,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# 24 Hz -> 50 frames ~= 2.08 seconds
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 ustc_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "endoscope_left",
             # "endoscope_right", # Mono Only
@@ -72,8 +72,7 @@ ustc_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Start at +1 so index 0 is the state reference (CMR-style offset)
-        delta_indices=list(range(0, ACTION_HORIZON)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "left_pose",
             "left_gripper",

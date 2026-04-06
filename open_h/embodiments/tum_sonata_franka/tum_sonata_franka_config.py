@@ -38,14 +38,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# 30 FPS -> 50 frames = 1.67 seconds of prediction
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 tum_sonata_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         # Camera order: external context first, then progressively more task-specific
         modality_keys=["tpv_camera", "wrist_camera", "ultrasound"],
     ),
@@ -70,8 +70,7 @@ tum_sonata_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Start at 1 (index 0 is state reference), go to ACTION_HORIZON
-        delta_indices=list(range(1, ACTION_HORIZON + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=["eef_pose"],  # 6D: xyz + roll/pitch/yaw (Euler)
         action_configs=[
             # EEF pose: REL_XYZ_ROT6D action with Euler input

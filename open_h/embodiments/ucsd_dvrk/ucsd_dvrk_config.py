@@ -27,14 +27,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# 30 FPS -> 50 frames = 1.67 seconds of prediction
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 ucsd_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "camera_left",
             # "camera_right", # Mono Only
@@ -56,8 +56,7 @@ ucsd_config = {
         ],
     ),
     "action": ModalityConfig(
-        # Start at 1 (index 0 is state reference), go to ACTION_HORIZON
-        delta_indices=list(range(1, ACTION_HORIZON + 1)),
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm_retraction_pose",
             "psm_retraction_gripper",

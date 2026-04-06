@@ -36,14 +36,14 @@ from gr00t.data.types import (
     ModalityConfig,
 )
 
-
-# Action horizon (how many future action steps to predict)
-# Matches existing dVRK config for consistency
-ACTION_HORIZON = 50
+from open_h.embodiments.temporal_layout import (
+    OPEN_H_ACTION_DELTA_INDICES,
+    OPEN_H_VIDEO_DELTA_INDICES,
+)
 
 dvrk_ucb_config = {
     "video": ModalityConfig(
-        delta_indices=[0],
+        delta_indices=OPEN_H_VIDEO_DELTA_INDICES,
         modality_keys=[
             "camera_left",
             # "camera_right", # Mono Only
@@ -72,7 +72,7 @@ dvrk_ucb_config = {
         ],
     ),
     "action": ModalityConfig(
-        delta_indices=list(range(ACTION_HORIZON)),  # [0, 1, 2, ..., 49] consecutive
+        delta_indices=OPEN_H_ACTION_DELTA_INDICES,
         modality_keys=[
             "psm1_pose",
             "psm1_gripper",
