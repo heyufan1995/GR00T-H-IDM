@@ -273,6 +273,8 @@ uv run python gr00t/eval/idm_lerobot_eval.py \
 
 Replace **`checkpoint-20000`** with the step folder you actually saved (e.g. `checkpoint-10000`).
 
+**`--checkpoint` must be a real directory on disk** (the `checkpoint-*` folder that contains `config.json`, weights, and `processor` / `statistics.json`). Export **`OUTPUT_DIR`** before running eval: if **`$OUTPUT_DIR`** is empty, **`$OUTPUT_DIR/checkpoint-10000`** becomes **`/checkpoint-10000`** (under filesystem root), which does not exist and triggers a confusing **`HFValidationError`** about repo ids.
+
 Outputs:
 
 - **`$OUTPUT_DIR/idm_eval_test/inference_summary.json`** — average and per-episode **MSE** / **MAE** in **unnormalized dataset space** (same convention as `gr00t/eval/open_loop_eval.py`).
@@ -307,6 +309,8 @@ uv run python gr00t/eval/idm_lerobot_eval.py \
 
 There is **no** `--observation-indices` flag here: video/state time offsets are defined by the **checkpoint’s processor** and the **MEDBOT** modality config (`OPEN_H_VIDEO_DELTA_INDICES` = `[0, 16]`). To change them you would edit `open_h/embodiments/temporal_layout.py` and retrain.
 
+**`--include-splits test`** only chooses **which episode indices** to evaluate from `meta/info.json` (`splits.test`). It does **not** affect processor / modality keys. If you see **`KeyError: 'medbot'`**, the checkpoint’s saved processor did not list `medbot` (typical for **Hub base** weights). **`Gr00tPolicy`** merges **`medbot`** from `open_h`’s registered `MODALITY_CONFIGS` when missing; you still need **`meta/stats.json`** (and compatible **`statistics.json`** next to the model) for correct normalization—prefer a **MEDBOT finetuned** `checkpoint-*` directory for eval on Medbot data.
+
 ---
 
 ## 7. File map
@@ -332,5 +336,6 @@ There is **no** `--observation-indices` flag here: video/state time offsets are 
 - **`invalid choice: 'medbot'` from `stats.py` / `launch_finetune.py`** — Tyro expects the enum member name (`MEDBOT`). Use `prepare_datasets.sh` (it uppercases the tag) or pass `--embodiment-tag MEDBOT` on the CLI.
 - **Language / task errors** — `modality.json` must define `annotation.task` → `task_index` as in this repo’s `medbot/modality.json`.
 - **Video backend** — finetuning defaults to `torchcodec` in `DataConfig`. If you see *“torchcodec is not available, falling back …”*, install **`torchcodec`** in **`.venv`** or run **`launch_finetune.py` with `--video-backend ffmpeg`** or **`--video-backend decord`**. For **`idm_lerobot_eval.py`**, use **`--video-backend`** there as well if needed.
+- **`KeyError: 'medbot'` in `idm_lerobot_eval` / `Gr00tPolicy`** — not caused by **`--include-splits`**. The checkpoint processor often omits downstream tags on **base** Hub models; the policy merges **`medbot`** from **`open_h`** when registered. For correct metrics, point **`--checkpoint`** at your **finetuned** `checkpoint-*` folder (with matching stats), not only **`nvidia/GR00T-H`**, unless you accept mismatched normalization.
 
 For the original **GR00T-Dreams** IDM (SigLIP, separate checkpoint family), use the **GR00T-Dreams** repository and its Medbot / `idm_inference_simple.py` scripts (same ideas as the surgical synthetic-data tutorial).

@@ -5,6 +5,7 @@ This module provides the core policy classes for running Gr00t models:
 - Gr00tSimPolicyWrapper: Wrapper for compatibility with existing Gr00t simulation environments
 """
 
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -12,11 +13,69 @@ import numpy as np
 import torch
 from transformers import AutoModel, AutoProcessor
 
+from gr00t.configs.data.embodiment_configs import MODALITY_CONFIGS
 from gr00t.data.embodiment_tags import EmbodimentTag
 from gr00t.data.interfaces import BaseProcessor
 from gr00t.data.types import MessageType, ModalityConfig, VLAStepData
+from gr00t.data.utils import parse_modality_configs
 
 from .policy import BasePolicy, PolicyWrapper
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_model_path(model_path: str) -> Path:
+    """Resolve a local checkpoint directory, or return a Path for Hub ids.
+
+    Raises FileNotFoundError for missing absolute paths (e.g. ``/checkpoint-N`` when
+    ``$OUTPUT_DIR`` was empty and the shell produced a path under filesystem root).
+    """
+    mp = str(model_path).strip()
+    p_exp = Path(mp).expanduser()
+    if p_exp.is_absolute():
+        local_path = p_exp.resolve()
+        if local_path.is_dir():
+            return local_path
+        raise FileNotFoundError(
+            f"Checkpoint directory does not exist: {local_path}. "
+            "If you used $OUTPUT_DIR/checkpoint-N, ensure OUTPUT_DIR is set in your shell — "
+            "when it is empty, the path becomes '/checkpoint-N' (under root) and loading fails "
+            "with a confusing Hugging Face repo-id error. Use the full path to your finetune "
+            "output, e.g. /path/to/outputs/.../checkpoint-10000."
+        )
+    cwd_path = (Path.cwd() / p_exp).resolve()
+    if cwd_path.is_dir():
+        return cwd_path
+    return Path(mp)
+
+
+def _ensure_processor_has_embodiment(processor: BaseProcessor, tag_val: str) -> None:
+    """If the checkpoint processor omits an embodiment (e.g. MEDBOT on Hub base), merge from registry."""
+    if tag_val in processor.get_modality_configs():
+        return
+    try:
+        import open_h.embodiments  # noqa: F401 — registers MEDBOT and other Open-H configs
+    except ImportError:
+        pass
+    if tag_val not in MODALITY_CONFIGS:
+        have = sorted(processor.get_modality_configs().keys())
+        raise KeyError(
+            f"Embodiment '{tag_val}' is missing from the checkpoint processor (available: {have}) "
+            f"and is not registered in MODALITY_CONFIGS. Use a finetuned checkpoint that includes "
+            f"this embodiment, or import open_h.embodiments before loading for Open-H tags like medbot."
+        ) from None
+    merged = dict(processor.get_modality_configs())
+    merged[tag_val] = MODALITY_CONFIGS[tag_val]
+    processor.modality_configs = parse_modality_configs(merged)
+    sap = getattr(processor, "state_action_processor", None)
+    if sap is not None and tag_val not in sap.statistics:
+        logger.warning(
+            "Merged modality layout for embodiment '%s' from MODALITY_CONFIGS, but that tag is "
+            "missing from the checkpoint's statistics.json. State/action normalization will likely "
+            "fail at inference — use a finetuned checkpoint directory for this embodiment (or stats "
+            "that include this tag).",
+            tag_val,
+        )
 
 
 def _rec_to_dtype(x: Any, dtype: torch.dtype) -> Any:
@@ -76,7 +135,7 @@ class Gr00tPolicy(BasePolicy):
         import gr00t.model  # noqa: F401
 
         super().__init__(strict=strict)
-        model_dir = Path(model_path)
+        model_dir = _resolve_model_path(model_path)
 
         # Load the pretrained model and move to target device with bfloat16 precision
         model = AutoModel.from_pretrained(model_dir)
@@ -90,6 +149,7 @@ class Gr00tPolicy(BasePolicy):
 
         # Store embodiment-specific configurations
         self.embodiment_tag = embodiment_tag
+        _ensure_processor_has_embodiment(self.processor, self.embodiment_tag.value)
         self.modality_configs = self.processor.get_modality_configs()[self.embodiment_tag.value]
         self.collate_fn = self.processor.collator
 
