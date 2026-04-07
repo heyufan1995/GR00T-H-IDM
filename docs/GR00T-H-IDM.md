@@ -262,11 +262,10 @@ python scripts/idm_inference_simple.py \
 cd "$REPO_ROOT"
 
 uv run python gr00t/eval/idm_lerobot_eval.py \
-  --checkpoint "$OUTPUT_DIR/checkpoint-20000" \
+  --checkpoint "$OUTPUT_DIR/checkpoint-100" \
   --dataset "$TEST_DATASET" \
   --output-dir "$OUTPUT_DIR/idm_eval_test" \
   --embodiment-tag MEDBOT \
-  --include-splits test \
   --action-horizon 16 \
   --no-plots
 ```

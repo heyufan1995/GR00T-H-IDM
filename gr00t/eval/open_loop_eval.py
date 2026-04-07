@@ -165,7 +165,29 @@ def evaluate_single_trajectory(
 
     modality_configs = deepcopy(loader.modality_configs)
     modality_configs.pop("action")
-    for step_count in range(0, actual_steps, action_horizon):
+    # Open-H-style video deltas (e.g. [0, 16]) require frames through step + max_delta; do not
+    # start inference past the last valid anchor or extract_step_data iloc goes out of bounds.
+    max_obs_delta = max(max(cfg.delta_indices) for cfg in modality_configs.values())
+    max_valid_anchor = traj_length - 1 - max_obs_delta
+    inference_upper = min(actual_steps, max_valid_anchor + 1)
+    if max_valid_anchor < 0:
+        logging.warning(
+            "Trajectory %s too short (%s rows) for observation deltas (max_delta=%s); skipping eval.",
+            traj_id,
+            traj_length,
+            max_obs_delta,
+        )
+        return float("nan"), float("nan")
+    if inference_upper < actual_steps:
+        logging.info(
+            "Capping inference anchors to <%s (trajectory length %s, max_obs_delta=%s) "
+            "so video/state windows stay in range.",
+            inference_upper,
+            traj_length,
+            max_obs_delta,
+        )
+
+    for step_count in range(0, inference_upper, action_horizon):
         data_point = extract_step_data(traj, step_count, modality_configs, embodiment_tag)
         logging.info(f"inferencing at step: {step_count}")
         obs = {}
@@ -198,10 +220,14 @@ def evaluate_single_trajectory(
 
     # plot the joints
     state_joints_across_time = extract_state_joints(traj, [f"state.{key}" for key in state_keys])
-    gt_action_across_time = extract_state_joints(traj, [f"action.{key}" for key in action_keys])[
-        :actual_steps
-    ]
-    pred_action_across_time = np.array(pred_action_across_time)[:actual_steps]
+    gt_action_full = extract_state_joints(traj, [f"action.{key}" for key in action_keys])
+    pred_action_across_time = np.array(pred_action_across_time)
+    align_len = int(
+        min(gt_action_full.shape[0], pred_action_across_time.shape[0], actual_steps)
+    )
+    state_joints_across_time = state_joints_across_time[:align_len]
+    gt_action_across_time = gt_action_full[:align_len]
+    pred_action_across_time = pred_action_across_time[:align_len]
     assert gt_action_across_time.shape == pred_action_across_time.shape, (
         f"gt_action: {gt_action_across_time.shape}, pred_action: {pred_action_across_time.shape}"
     )
