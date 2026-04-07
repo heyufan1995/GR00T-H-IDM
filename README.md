@@ -40,14 +40,17 @@ For general robotics use cases, the upstream [Isaac-GR00T](https://github.com/NV
 git clone --recurse-submodules git@github.com:NVIDIA-Medtech/GR00T-H.git
 cd GR00T-H
 uv sync --python 3.10
-uv pip install -e .
 ```
 
-If `flash-attn` was not built during `uv sync`, install it manually:
+`uv sync` installs dependencies and this repo in **editable** mode into `.venv/`; you normally do **not** need `uv pip install -e .` separately.
+
+`flash-attn` is an **optional** extra (see `pyproject.toml` → `gpu`); it is **not** installed by default. On Linux with NVIDIA CUDA, install FlashAttention after sync:
 
 ```bash
 uv pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
+
+Or use **`--no-use-flash-attention`** on finetuning if you skip it (slower). See [docs/GR00T-H-IDM.md](docs/GR00T-H-IDM.md) for details.
 
 For containerized setup, see the [Docker Setup Guide](docker/README.md).
 

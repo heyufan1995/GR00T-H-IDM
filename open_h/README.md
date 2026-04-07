@@ -49,6 +49,8 @@ bash open_h/prepare_datasets.sh \
     /path/to/dataset_a /path/to/dataset_b ...
 ```
 
+`--embodiment-tag` is uppercased inside the script so values like `medbot` work the same as `MEDBOT` (Tyro’s `EmbodimentTag` choices use enum member names). If you invoke `stats.py` or `launch_finetune.py` yourself, pass the uppercase form (e.g. `MEDBOT`).
+
 For each dataset, this script:
 1. Copies the `modality.json` into the dataset's `meta/` directory
 2. Generates `stats.json` (normalization stats over the raw parquet data) via `gr00t/data/stats.py`

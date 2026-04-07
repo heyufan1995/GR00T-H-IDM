@@ -386,6 +386,13 @@ def get_frames_by_indices(
         return frames.asnumpy()
     elif video_backend == "ffmpeg":
         return _extract_frames_ffmpeg(video_path, list(indices))
+    elif video_backend == "pyav":
+        # resolve_backend may fall back to pyav when torchcodec/decord are unavailable.
+        # get_all_frames implements pyav via av, but sparse index reads are not — use ffmpeg CLI.
+        return _extract_frames_ffmpeg(video_path, list(indices))
+    elif video_backend == "torchvision_av":
+        # Timestamp path implements torchvision_av; for index-based loading delegate to ffmpeg.
+        return _extract_frames_ffmpeg(video_path, list(indices))
     elif video_backend == "opencv":
         frames = []
         cap = cv2.VideoCapture(video_path, **video_backend_kwargs)

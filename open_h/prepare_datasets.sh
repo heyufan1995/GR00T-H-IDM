@@ -23,7 +23,7 @@ Usage:
     <DATASET_PATH> [<DATASET_PATH> ...]
 
 Required arguments:
-  --embodiment-tag   Embodiment tag to pass to stats and finetune scripts
+  --embodiment-tag   Embodiment tag (case-insensitive; e.g. medbot or MEDBOT)
   --modality-json    Path to modality JSON copied into each dataset meta/ folder
   DATASET_PATH       One or more dataset paths to process
 EOF
@@ -79,6 +79,10 @@ done
 [[ -n "${MODALITY_FILE}" ]] || die "Missing required --modality-json"
 [[ ${#DATASET_PATHS[@]} -gt 0 ]] || die "Provide at least one DATASET_PATH"
 [[ -f "${MODALITY_FILE}" ]] || die "Modality file does not exist: ${MODALITY_FILE}"
+
+# Tyro parses EmbodimentTag using enum *member* names (e.g. MEDBOT, CMR_VERSIUS), not the
+# lowercase .value (e.g. medbot). Accept either by uppercasing here.
+EMBODIMENT_TAG="$(echo "${EMBODIMENT_TAG}" | tr '[:lower:]' '[:upper:]')"
 
 for dataset_path in "${DATASET_PATHS[@]}"; do
     echo "=== Processing ${dataset_path} ==="

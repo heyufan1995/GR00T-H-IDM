@@ -63,6 +63,7 @@ EMBODIMENT_TAG_TO_PROJECTOR_INDEX = {
     "jhu_imerse_star_il": 27,
     "tud_tundra_ur5e": 25,
     "turin_mitic_ex_vivo": 26,
+    "medbot": 28,
 }
 
 
