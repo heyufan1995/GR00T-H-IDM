@@ -201,6 +201,8 @@ On **one node**, these must agree (otherwise you get wrong batch math or hung re
 
 FlashAttention is unrelated to the above: it depends on **`flash_attn`** in the venv and Hub **`use_flash_attention`** (see **§1.3**).
 
+**Video decoding:** the stack defaults to **`torchcodec`**. If it is not installed, you will see a fallback warning. Either install **`torchcodec`** in **`.venv`**, or pass **`--video-backend ffmpeg`** (needs **`ffmpeg`** / **`ffprobe`** on `PATH`) or **`--video-backend decord`** on `launch_finetune.py`.
+
 ### 5.2 Example command (8 GPUs)
 
 ```bash
@@ -230,6 +232,7 @@ Only add **`--include-splits train`** if **`meta/info.json`** defines a **`split
 ### 5.4 Notes
 
 - **`--embodiment-tag MEDBOT`** uses `open_h/embodiments/medbot/medbot_config.py` (no `--modality-config-path` needed).
+- Add **`--video-backend ffmpeg`** (or **`decord`**) if **`torchcodec`** is missing and you want to avoid noisy fallback warnings.
 - Tune **`--global-batch-size`**, **`--max-steps`**, **`--save-steps`**, **`--dataloader-num-workers`** for your cluster.
 - For **vision-only** style training, see `open_h/gr00t_h_config.yaml` and `state_dropout_prob_per_embodiment` in upstream docs.
 
@@ -328,6 +331,6 @@ There is **no** `--observation-indices` flag here: video/state time offsets are 
 - **Missing `stats.json` / `temporal_stats.json`** — run `prepare_datasets.sh` and `launch_finetune.py --calculate-norm-stats` for that dataset path.
 - **`invalid choice: 'medbot'` from `stats.py` / `launch_finetune.py`** — Tyro expects the enum member name (`MEDBOT`). Use `prepare_datasets.sh` (it uppercases the tag) or pass `--embodiment-tag MEDBOT` on the CLI.
 - **Language / task errors** — `modality.json` must define `annotation.task` → `task_index` as in this repo’s `medbot/modality.json`.
-- **Video backend** — default in `idm_lerobot_eval.py` is `torchcodec`; if decoding fails, try `--video-backend decord` where supported.
+- **Video backend** — finetuning defaults to `torchcodec` in `DataConfig`. If you see *“torchcodec is not available, falling back …”*, install **`torchcodec`** in **`.venv`** or run **`launch_finetune.py` with `--video-backend ffmpeg`** or **`--video-backend decord`**. For **`idm_lerobot_eval.py`**, use **`--video-backend`** there as well if needed.
 
 For the original **GR00T-Dreams** IDM (SigLIP, separate checkpoint family), use the **GR00T-Dreams** repository and its Medbot / `idm_inference_simple.py` scripts (same ideas as the surgical synthetic-data tutorial).

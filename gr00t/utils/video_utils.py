@@ -48,7 +48,8 @@ _INCOMPATIBLE_BACKEND_CODECS: dict[str, set[str]] = {
 }
 
 # Preferred fallback order when the requested backend is unavailable or incompatible.
-_BACKEND_FALLBACK_ORDER = ["torchcodec", "decord", "pyav", "ffmpeg"]
+# Prefer ffmpeg before pyav: ffmpeg maps cleanly to sparse frame reads; pyav is a weaker default.
+_BACKEND_FALLBACK_ORDER = ["torchcodec", "decord", "ffmpeg", "pyav"]
 
 
 def _is_backend_available(backend: str) -> bool:

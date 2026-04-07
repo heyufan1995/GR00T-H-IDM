@@ -224,5 +224,7 @@ if __name__ == "__main__":
     config.data.shard_size = ft_config.shard_size
     config.data.episode_sampling_rate = ft_config.episode_sampling_rate
     config.data.num_shards_per_epoch = ft_config.num_shards_per_epoch
+    if ft_config.video_backend is not None:
+        config.data.video_backend = ft_config.video_backend
 
     run(config)

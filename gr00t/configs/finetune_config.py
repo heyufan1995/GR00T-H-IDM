@@ -170,6 +170,13 @@ class FinetuneConfig:
     num_shards_per_epoch: int = int(1e5)
     """Number of shards to use for the dataset. reduce this number if vram is limited."""
 
+    video_backend: str | None = None
+    """
+    If set, overrides ``config.data.video_backend`` for training (e.g. ``ffmpeg`` or
+    ``decord`` when ``torchcodec`` is not installed). If None, the default from
+    ``DataConfig`` is used (``torchcodec``), which may log a fallback warning.
+    """
+
     # --- Statistics Calculation Flags ---
     calculate_norm_stats: bool = False
     """
