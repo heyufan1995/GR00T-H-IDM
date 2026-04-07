@@ -229,13 +229,14 @@ class ShardedSingleStepDataset(ShardedDataset):
         self.episode_indices = episode_indices  # Store for shard_dataset()
         self.processor = None
         self.rng = np.random.default_rng(seed)
-        action_delta_indices = modality_configs["action"].delta_indices
 
-        # BUG: The below assumed contiguous delta indices, but fails for [0,2,4,...,32]
-        # self.action_horizon = max(action_delta_indices) - min(action_delta_indices) + 1
-        # action_horizon must account for the maximum delta index, not just the range
-        # This ensures step_index + max(delta_indices) < episode_length
-        self.action_horizon = max(action_delta_indices) + 1
+        # Largest delta index across *all* modalities. Open-H uses video [0, 16] and
+        # action [0..15]; sharding must not sample anchor steps where e.g. step+16 is
+        # past the last frame. Using only the action horizon allowed step L-16 with
+        # video delta 16 → frame L → KeyError in sparse extract_step_data.
+        self.max_delta_index = max(
+            max(config.delta_indices) for config in modality_configs.values()
+        )
 
         self.episode_loader = LeRobotEpisodeLoader(
             dataset_path=dataset_path,
@@ -372,9 +373,9 @@ class ShardedSingleStepDataset(ShardedDataset):
         self.shard_lengths = shard_lengths
 
     def get_effective_episode_length(self, episode_index: int) -> int:
-        """Get the effective episode length accounting for action horizon."""
+        """Count of valid anchor steps: need step + max_delta <= episode_length - 1."""
         original_length = self.episode_loader.get_episode_length(episode_index)
-        return max(0, original_length - self.action_horizon + 1)
+        return max(0, original_length - self.max_delta_index)
 
     def _filter_all_episodes_parallel(
         self, num_workers: int | None = None
